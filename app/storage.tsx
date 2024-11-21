@@ -25,18 +25,22 @@ export const verifyPassword = async (password: string) => {
 
 // Store encrypted note using CBC mode with a random IV
 export const storeNote = async (note: string, password: string) => {
-    console.log("\nSTORE NOTE")
+  console.log("\nSTORE NOTE");
   console.log('Storing note');
   console.log('Note:', note);
-  console.log("Password:",  password);
+  console.log("Password:", password);
+  
   try {
     // Generate random IV using expo-crypto
     const randomBytes = await Crypto.getRandomBytesAsync(16); // 128-bit IV
-    const iv = CryptoJS.lib.WordArray.create(randomBytes); // Konwertuj na WordArray
+    const iv = CryptoJS.lib.WordArray.create(randomBytes); // Convert to WordArray
     console.log('IV generated:', iv.toString(CryptoJS.enc.Hex));
 
+    // Convert password to WordArray
+    const key = CryptoJS.SHA256(password); 
+
     // Encrypt note using password and IV
-    const encrypted = CryptoJS.AES.encrypt(note, CryptoJS.enc.Utf8.parse(password.toString()), {
+    const encrypted = CryptoJS.AES.encrypt(note, key, {
       iv: iv,
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,
@@ -54,7 +58,7 @@ export const storeNote = async (note: string, password: string) => {
 };
 
 
-
+// Retrieve and decrypt note using password
 export const getNote = async (password: string) => {
   const encryptedNote = await SecureStore.getItemAsync(NOTE_KEY);
   console.log("\nGET NOTE");
@@ -76,26 +80,30 @@ export const getNote = async (password: string) => {
       const ciphertext = CryptoJS.enc.Hex.parse(ciphertextHex);
       console.log('Parsed IV:', iv.toString(CryptoJS.enc.Hex));
       console.log('Parsed ciphertext:', ciphertext.toString(CryptoJS.enc.Hex));
-      // Decrypt note
+
+      // Convert password to WordArray
+      const key = CryptoJS.SHA256(password);
+      console.log('Key:', key.toString(CryptoJS.enc.Hex));
+
+      // Decrypt note using the password
       const decrypted = CryptoJS.AES.decrypt(
-        CryptoJS.lib.CipherParams.create({
-          ciphertext: ciphertext,
-          iv: iv
-        }),
-        CryptoJS.enc.Utf8.parse(password.toString()), //JSON.stringify fix
         {
-          iv: iv,
-          mode: CryptoJS.mode.CBC,
-          padding: CryptoJS.pad.Pkcs7
+          ciphertext: ciphertext, // zaszyfrowany tekst
+        },
+        key, // klucz szyfrujący
+        {
+          iv: iv, // wektor inicjujący
+          mode: CryptoJS.mode.CBC, // tryb szyfrowania (w tym przypadku CBC)
+          padding: CryptoJS.pad.Pkcs7, // padding (w tym przypadku Pkcs7)
         }
       );
 
+      // Check if decrypted data is correct
       console.log('Decrypted:', decrypted);
-      const decryptedWordArray = decrypted.words;
-      console.log('Decrypted:', decryptedWordArray);
-            
-      // Convert decrypted result to UTF-8 and return
+
+      // Convert decrypted result to UTF-8
       const decryptedNote = decrypted.toString(CryptoJS.enc.Utf8);
+
       if (decryptedNote) {
         console.log('Decrypted note:', decryptedNote);
         return decryptedNote;
@@ -112,7 +120,6 @@ export const getNote = async (password: string) => {
 
   return null; // Return null if no encrypted note is found
 };
-
 
 // Check if password exists (used on first app launch)
 export const isPasswordSet = async () => {
