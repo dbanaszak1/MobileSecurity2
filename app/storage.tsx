@@ -31,20 +31,20 @@ export const storeNote = async (note: string, password: string) => {
   console.log("Password:", password);
 
   try {
-    // Generate random IV (16 bytes) using expo-crypto
-    const ivBytes = await Crypto.getRandomBytesAsync(16); // 128-bit IV
-    const iv = CryptoJS.lib.WordArray.create(ivBytes); // Convert to WordArray
+    // GenerateIV
+    const ivBytes = await Crypto.getRandomBytesAsync(16);
+    const iv = CryptoJS.lib.WordArray.create(ivBytes);
     console.log('IV generated:', iv.toString(CryptoJS.enc.Hex));
 
-    // Generate random salt (16 bytes) using expo-crypto
-    const saltBytes = await Crypto.getRandomBytesAsync(16); // 128-bit salt
-    const salt = CryptoJS.lib.WordArray.create(saltBytes); // Convert to WordArray
+    // Generate salt
+    const saltBytes = await Crypto.getRandomBytesAsync(16);
+    const salt = CryptoJS.lib.WordArray.create(saltBytes); 
     console.log('Salt generated:', salt.toString(CryptoJS.enc.Hex));
 
-    // Derive key using password and salt (e.g., PBKDF2)
+    // Derive key
     const key = CryptoJS.PBKDF2(password, salt, {
-      keySize: 256 / 32, // 256-bit key
-      iterations: 1000,  // Number of PBKDF2 iterations
+      keySize: 256 / 32, // 256-bit
+      iterations: 1000, 
     });
     console.log('Key derived:', key.toString(CryptoJS.enc.Hex));
 
@@ -55,7 +55,7 @@ export const storeNote = async (note: string, password: string) => {
       padding: CryptoJS.pad.Pkcs7,
     });
 
-    // Concatenate salt, IV, and ciphertext for storage
+    // Concatenate to storage
     const encryptedNote = salt.toString(CryptoJS.enc.Hex) + ':' + iv.toString(CryptoJS.enc.Hex) + ':' + encrypted.ciphertext.toString(CryptoJS.enc.Hex);
     console.log('Encrypted Note:', encryptedNote);
 

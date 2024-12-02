@@ -4,6 +4,8 @@ import { isPasswordSet } from './storage';
 import LoginScreen from '../Components/LoginScreen';
 import NoteScreen from '../Components/NoteScreen';
 import SetPasswordScreen from '../Components/SetPasswordScreen';
+import BiometricScreen from '@/Components/BiometricScreen';
+import { StackRouter } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 
