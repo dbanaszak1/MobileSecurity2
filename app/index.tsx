@@ -4,8 +4,6 @@ import { isPasswordSet } from './storage';
 import LoginScreen from '../Components/LoginScreen';
 import NoteScreen from '../Components/NoteScreen';
 import SetPasswordScreen from '../Components/SetPasswordScreen';
-import BiometricScreen from '@/Components/BiometricScreen';
-import { StackRouter } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 
@@ -32,7 +30,12 @@ export default function App() {
   
 
   return (
-    <Stack.Navigator initialRouteName={initialScreen}>
+    <Stack.Navigator 
+      initialRouteName={initialScreen}     
+      screenOptions={{
+        headerShown: false,
+      }}
+      >
       <Stack.Screen name="SetPassword" component={SetPasswordScreen} options={{ title: 'Set Password' }} />
       <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login' }} />
       <Stack.Screen name="Note" component={NoteScreen} options={{ title: 'Your Note' }} />
