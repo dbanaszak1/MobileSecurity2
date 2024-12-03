@@ -36,7 +36,7 @@ const LoginScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
         // Reset attempts and delay on successful login
         setAttempts(0);
         setDelay(0);
-        navigation.navigate('Note', { password }); // Navigate to the note screen
+        navigation.navigate('Note', { password });
       } else {
         const newAttempts = attempts + 1;
         setAttempts(newAttempts); 
@@ -80,7 +80,7 @@ const [pass, setPass] = useState('');
           // Reset attempts and delay on successful login
           setAttempts(0);
           setDelay(0);
-          navigation.navigate('Note', { password }); // Navigate to the note screen
+          navigation.navigate('Note', { password });
         }
       } catch (error) {
         Alert.alert("err");
@@ -131,6 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: 5, 
     alignItems: 'center',
     padding: 10,
+    marginBottom: 10,
   },
   buttonText: { 
     color: 'white', 

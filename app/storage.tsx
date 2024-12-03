@@ -95,8 +95,8 @@ export const getNote = async (password: string) => {
 
       // KEY
       const key = CryptoJS.PBKDF2(password, salt, {
-        keySize: 256 / 32, // 256-bit key
-        iterations: 1000,  // Iterations
+        keySize: 256 / 32, // 256-bit
+        iterations: 1000,
       });
       console.log('Derived Key:', key.toString(CryptoJS.enc.Hex));
 

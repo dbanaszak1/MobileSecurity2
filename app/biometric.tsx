@@ -8,7 +8,7 @@ export const store_key = async (password: string) => {
   console.log('Storing password securely');
 
   try {
-    // Autoryzacja biometryczna
+    // Cheking fingerprint
     const biometricAuth = await LocalAuthentication.authenticateAsync({
       promptMessage: 'Authenticate to store your password securely',
     });
@@ -17,33 +17,33 @@ export const store_key = async (password: string) => {
       throw new Error('Biometric authentication failed.');
     }
 
-    // Generowanie losowego klucza biometrycznego (256-bitowy klucz AES) tylko raz (przy pierwszej autentykacji)
+    // Random key and save in secure store (key is not a real biometric key ://)
     const biometricKey = await Crypto.getRandomBytesAsync(32);
-    await SecureStore.setItemAsync('biometricKey', JSON.stringify(Array.from(biometricKey))); // Zapisanie klucza w SecureStore
+    await SecureStore.setItemAsync('biometricKey', JSON.stringify(Array.from(biometricKey))); 
 
-    // Generowanie losowego IV (128-bitowy IV)
+    // Random IV
     const ivBytes = await Crypto.getRandomBytesAsync(16);
     const iv = CryptoJS.lib.WordArray.create(ivBytes);
     console.log('IV generated:', iv.toString(CryptoJS.enc.Hex));
 
-    // Generowanie losowej soli (128-bitowa sól)
+    // Salt
     const saltBytes = await Crypto.getRandomBytesAsync(16);
     const salt = CryptoJS.lib.WordArray.create(saltBytes);
     console.log('Salt generated:', salt.toString(CryptoJS.enc.Hex));
 
-    // Szyfrowanie hasła przy użyciu AES-256-CBC z wykorzystaniem klucza i IV
-    const key = CryptoJS.lib.WordArray.create(biometricKey); // Klucz biometryczny
+    // Encryoting password
+    const key = CryptoJS.lib.WordArray.create(biometricKey);
     const encrypted = CryptoJS.AES.encrypt(password, key, {
       iv: iv,
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,
     });
 
-    // Łączenie soli, IV i szyfrogramu do przechowywania
+    // Cat salt + iv + encrypted password
     const encryptedPassword = salt.toString(CryptoJS.enc.Hex) + ':' + iv.toString(CryptoJS.enc.Hex) + ':' + encrypted.ciphertext.toString(CryptoJS.enc.Hex);
     console.log('Encrypted Password:', encryptedPassword);
 
-    // Zapisanie zaszyfrowanego hasła w SecureStore
+    // Save all in secure store
     await SecureStore.setItemAsync('encryptedPassword', encryptedPassword);
     console.log('Password stored securely');
   } catch (error) {
@@ -54,47 +54,45 @@ export const store_key = async (password: string) => {
 
 
 export const get_key = async () => {
-    console.log("\nRETRIEVE KEY");
-    console.log('Retrieving password securely');
+    console.log("\nGET KEY");
   
     try {
-      // Autoryzacja biometryczna
-      const biometricAuth = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate to retrieve your password',
-      });
+    // Cheking fingerprint
+      const biometricAuth = await LocalAuthentication.authenticateAsync();
   
       if (!biometricAuth.success) {
         throw new Error('Biometric authentication failed.');
       }
   
-      // Pobranie zaszyfrowanego hasła z SecureStore
+      // Get pswd from secure store
       const encryptedPassword = await SecureStore.getItemAsync('encryptedPassword');
       if (!encryptedPassword) {
         throw new Error('No encrypted password found.');
       }
-      console.log('Encrypted password retrieved:', encryptedPassword);
+      console.log('Encrypted password:', encryptedPassword);
   
-      // Podział zaszyfrowanego hasła na sól, IV i szyfrogram
+      // Get encrypted data
       const [saltHex, ivHex, cipherTextHex] = encryptedPassword.split(':');
       const salt = CryptoJS.enc.Hex.parse(saltHex);
       const iv = CryptoJS.enc.Hex.parse(ivHex);
       const cipherText = CryptoJS.enc.Hex.parse(cipherTextHex);
   
-      // Pobranie zapisanego klucza biometrycznego z SecureStore
+      // Get key - 'biometricKey' from secure store
       const biometricKey = await SecureStore.getItemAsync('biometricKey');
       if (!biometricKey) {
-        throw new Error('No biometric key found.');
+        throw new Error('No key found.');
       }
       const key = CryptoJS.lib.WordArray.create(Uint8Array.from(JSON.parse(biometricKey))); // Klucz biometryczny
   
-      // Odszyfrowanie hasła przy użyciu AES-256-CBC
-      const decrypted = CryptoJS.AES.decrypt({ ciphertext: cipherText }, key, {
+      // Decrypt password - AES-256-CBC
+      const decrypted = CryptoJS.AES.decrypt({ ciphertext: cipherText }, 
+      key, {
         iv: iv,
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7,
       });
   
-      // Konwersja odszyfrowanego hasła do tekstu
+      // Convert password to string
       const decryptedPassword = decrypted.toString(CryptoJS.enc.Utf8);
   
       if (!decryptedPassword) {
@@ -102,9 +100,9 @@ export const get_key = async () => {
       }
   
       console.log('Decrypted Password:', decryptedPassword);
-      return decryptedPassword; // Zwrócenie odszyfrowanego hasła
+      return decryptedPassword; // Return decrypted password
     } catch (error) {
-      console.error('Error retrieving password:', error);
+      console.error(error);
       throw error;
     }
   };
