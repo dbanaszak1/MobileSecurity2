@@ -39,6 +39,7 @@ export default function App() {
       <Stack.Screen name="SetPassword" component={SetPasswordScreen} options={{ title: 'Set Password' }} />
       <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login' }} />
       <Stack.Screen name="Note" component={NoteScreen} options={{ title: 'Your Note' }} />
+      <Stack.Screen name="ChangePassword" component={SetPasswordScreen} options={{ title: 'Change Password' }} />
     </Stack.Navigator>
   );
 }
