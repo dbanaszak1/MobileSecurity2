@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { storeNote, getNote } from '../app/storage';
+import { NavigationProp } from '@react-navigation/native';
 
-const NoteScreen = ({ route }) => {
+const NoteScreen = ( route: any, navigation: NavigationProp<any>) => {
   const password = route.params;
   const [note, setNote] = useState('');
 
-  useEffect(() => {
+
+  useEffect(() => {+
     const loadNote = async () => {
       const savedNote = await getNote(password.password);
       if (savedNote !== null) setNote(savedNote);
@@ -30,6 +32,7 @@ const NoteScreen = ({ route }) => {
         onChangeText={setNote}
       />
       <Button title="Save Note" onPress={handleSaveNote} />
+      <Button title="Change Password" onPress={() => navigation.navigate('ChangePassword')} />
     </View>
   );
 };
