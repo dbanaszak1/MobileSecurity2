@@ -9,9 +9,7 @@ export const store_key = async (password: string) => {
 
   try {
     // Cheking fingerprint
-    const biometricAuth = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Authenticate to store your password securely',
-    });
+    const biometricAuth = await LocalAuthentication.authenticateAsync();
 
     if (!biometricAuth.success) {
       throw new Error('Biometric authentication failed.');
