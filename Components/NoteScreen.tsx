@@ -3,14 +3,19 @@ import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { storeNote, getNote } from '../app/storage';
 import { NavigationProp } from '@react-navigation/native';
 
-const NoteScreen = ( route: any, navigation: NavigationProp<any>) => {
+interface NoteScreenProps {
+  navigation: NavigationProp<any>;
+  route: { params: { password: string } };
+}
+const NoteScreen = ( {navigation, route}: NoteScreenProps ) => {
   const password = route.params;
   const [note, setNote] = useState('');
+  const [pass, setPass] = useState("")
 
-
-  useEffect(() => {+
+  useEffect(() => {
     const loadNote = async () => {
       const savedNote = await getNote(password.password);
+      setPass(password.password)
       if (savedNote !== null) setNote(savedNote);
     };
     loadNote();
@@ -32,7 +37,7 @@ const NoteScreen = ( route: any, navigation: NavigationProp<any>) => {
         onChangeText={setNote}
       />
       <Button title="Save Note" onPress={handleSaveNote} />
-      <Button title="Change Password" onPress={() => navigation.navigate('ChangePassword')} />
+      <Button title="Change Password" onPress={() => navigation.navigate('ChangePassword', { pass })} />
     </View>
   );
 };
