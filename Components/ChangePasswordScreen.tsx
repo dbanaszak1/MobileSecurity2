@@ -5,28 +5,32 @@ import { NavigationProp } from '@react-navigation/native';
 import store_key from '../app/biometric';
 import { getNote } from '../app/storage';
 
+// Params nav prop + actual password
 interface PasswordScreenProps {
     navigation: NavigationProp<any>;
-    route: { params: { password: string } }
+    route: { params: { pass: string } }
     }
 
 const SetPasswordScreen = ({navigation, route}: PasswordScreenProps) => {
   const [password, setPassword] = useState('');
   const old_password = route.params;
-  console.log("Old password", old_password);
   const [note, setNote] = useState('');
 
-
+// Load old note to save with neew key (pass)
   useEffect(() => {
     const loadNote = async () => {
-      const savedNote = await getNote(old_password.password);
-      if (savedNote !== null) setNote(savedNote);
+      console.log("\nPASS CHANGE")
+      console.log("Old password", old_password.pass);
+      const savedNote = await getNote(old_password.pass);
+      if (savedNote !== null){
+        setNote(savedNote);
+      }
       console.log('Note loaded:', savedNote);
     };
     loadNote();
   }, [old_password]);
 
-
+// Set new password
   const handleSetPassword = async () => {
     if (password.length < 10) {
       Alert.alert('Error', 'Password must be at least 10 characters long.');
@@ -34,10 +38,10 @@ const SetPasswordScreen = ({navigation, route}: PasswordScreenProps) => {
     }
     await storePassword(password);
     console.log('Password set successfully');
-    await store_key.store_key(password);
+    await store_key.store_key(password); //store new key
     console.log('Biometric key stored');
     console.log(note)
-    await storeNote(note, password); // Save an empty note
+    await storeNote(note, password);
     console.log('Empty note saved');
     Alert.alert('Success', 'Password set successfully.');
     navigation.navigate('Login');
